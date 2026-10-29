@@ -1,0 +1,80 @@
+# Compila o TOTKRecompAndroid (com a importação de NSP/XCI) e entrega o APK como artefato.
+# Rode em: aba Actions > "Build APK" > Run workflow. A primeira vez leva de 1 a 2 horas (compila SDL3,
+# shaderc, FFmpeg, unicorn...); as seguintes usam o cache das dependências.
+name: Build APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    env:
+      NDK_VERSION: 30.0.16248370
+    steps:
+      - uses: actions/checkout@v4
+
+      # (o zip do código trazia a pasta do submódulo vazia: ele é clonado aqui)
+      - name: libadrenotools
+        run: |
+          rm -rf third_party/libadrenotools
+          git clone --recursive https://github.com/bylaws/libadrenotools third_party/libadrenotools
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Pacotes do sistema
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build cmake pkg-config xz-utils bzip2 python3 curl
+
+      - name: Android SDK (NDK, CMake, plataforma)
+        run: |
+          yes | sdkmanager --licenses > /dev/null || true
+          sdkmanager "platforms;android-36" "build-tools;36.0.0" "ndk;$NDK_VERSION" "cmake;3.30.4"
+
+      - name: Cache das dependências
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            android/deps/out
+            android/deps/ffmpeg
+            android/deps/src
+          key: deps-v1-${{ hashFiles('android/deps/*.sh') }}-${{ github.run_id }}
+          restore-keys: |
+            deps-v1-${{ hashFiles('android/deps/*.sh') }}-
+
+      - name: Dependências nativas (SDL3, shaderc, FFmpeg, Python, zig...)
+        run: |
+          export ANDROID_NDK="$ANDROID_HOME/ndk/$NDK_VERSION"
+          export ANDROID_NDK_LINUX="$ANDROID_NDK"
+          chmod +x android/deps/*.sh
+          bash android/deps/build_deps.sh
+          bash android/deps/build_ffmpeg.sh
+          bash android/deps/build_gen_deps.sh
+
+      - name: Salvar o cache das dependências
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            android/deps/out
+            android/deps/ffmpeg
+            android/deps/src
+          key: deps-v1-${{ hashFiles('android/deps/*.sh') }}-${{ github.run_id }}
+
+      - name: Compilar o APK
+        working-directory: android/totkrecompandroid
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon assembleRelease
+
+      - name: Enviar o APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: TOTKRecompAndroid-NSP-XCI
+          path: android/totkrecompandroid/app/build/outputs/apk/release/*.apk
+          if-no-files-found: error
