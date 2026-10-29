@@ -1,0 +1,12 @@
+.gradle/
+build/
+.cxx/
+local.properties
+*.iml
+.idea/
+deps/src/
+deps/work/
+deps/out/
+deps/ffmpeg/
+*.log
+out/

@@ -1,0 +1,3 @@
+# Keep Android build scripts compatible with Bash on development hosts.
+*.sh text eol=lf
+*.py text eol=lf

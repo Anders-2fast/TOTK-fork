@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="shortcut_system_driver">System driver</string>
+    <string name="shortcut_system_driver_long">Start with the system driver</string>
+    <string name="shortcut_pick_driver">Choose driver</string>
+    <string name="shortcut_pick_driver_long">Choose a Vulkan driver (.zip)</string>
+    <string name="driver_not_a_package">Not a driver package (.zip or .so): the driver wasn\'t changed.</string>
+    <string name="driver_error_title">Graphics driver error</string>
+    <string name="driver_install">Install a driver</string>
+    <string name="driver_system">Use the system driver</string>
+    <string name="driver_close">Close</string>
+    <string name="driver_error_intro">The graphics driver couldn\'t run the game. A Turnip driver for your GPU (.zip) usually solves it: tap Install a driver.\n\nDetails:</string>
+    <string name="build_channel">Game code build</string>
+    <string name="build_title">Building the game code</string>
+    <string name="build_text">BOTWRecompAndroid keeps building with the screen off. Keep the phone charging.</string>
+</resources>

@@ -1,0 +1,3 @@
+# shell scripts run in Git Bash / WSL / Linux: LF whatever the clone's line ending setting
+*.sh text eol=lf
+gradlew text eol=lf
